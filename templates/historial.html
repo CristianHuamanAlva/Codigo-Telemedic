@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Respuestas</title>
+</head>
+<body>
+    <h1>Historial de tus respuestas</h1>
+    <ul>
+        {% for respuesta in respuestas %}
+            <li>
+                <strong>Nombre:</strong> {{ respuesta.nombre }}<br>
+                <strong>Opción elegida:</strong> {{ respuesta.opcion }}<br>
+                <strong>Emergencias:</strong> {{ respuesta.emergencias }}<br>
+                <strong>Sintomas:</strong> {{ respuesta.sintomas }}<br>
+                <strong>Prevención:</strong> {{ respuesta.prevencion }}<br>
+                <strong>Cuidados:</strong> {{ respuesta.cuidados }}<br>
+                <strong>Decisión final:</strong> {{ respuesta.decision }}<br>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

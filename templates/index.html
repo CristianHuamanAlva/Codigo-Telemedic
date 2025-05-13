@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Telemedic | Asistente Virtual</title>
+
+  <!-- Bootstrap y Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Google Fonts y estilos personalizados -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+    :root {
+      --primary-color: #8d6cc7;
+      --background-color: #f8fafc;
+      --text-color: #4a5568;
+      --border-color: #dae2f1;
+      --primary-hover: #7a59b8;
+      --light-text: #8498af;
+      --border-radius: 8px;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background-color: var(--background-color);
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar-custom {
+      background-color: var(--primary-color);
+      font-family: 'Montserrat', sans-serif;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-custom .navbar-brand {
+      color: white;
+      font-weight: 600;
+    }
+
+    .navbar-custom .user-info {
+      color: white;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .navbar-custom .user-info i {
+      font-size: 1.5rem;
+    }
+
+    /* Estilo del texto "Bienvenido" */
+    .user-welcome {
+      font-weight: 500;
+      font-size: 1rem;
+      color: white;
+      background-color: transparent;
+      padding: 8px 12px;
+      border-radius: var(--border-radius);
+    }
+
+    /* Dropdown */
+    .custom-dropdown {
+      background-color: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      min-width: 100%;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      font-family: 'Lato', sans-serif;
+    }
+
+    .logout-item {
+      color: var(--primary-color);
+      font-weight: 500;
+      padding: 10px 20px;
+      transition: background-color 0.2s ease;
+    }
+
+    .logout-item:hover {
+      background-color: var(--primary-hover);
+      color: white;
+    }
+
+    .dropdown-menu {
+      padding: 0;
+    }
+
+    .dropdown-menu-end {
+      right: 0;
+      left: auto;
+    }
+
+    /* Ajuste de la imagen o icono */
+    .btn-icon {
+      background: none;
+      border: none;
+    }
+
+    .btn-icon:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    /* Chatbot container */
+    #myLandbot {
+      margin: 20px auto;
+      width: 100%;
+      max-width: 800px;
+      height: 500px;
+    }
+
+</style>
+</head>
+<body>
+
+  {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
+      <span class="navbar-brand">Telemedic</span>
+      <div class="user-info d-flex align-items-center gap-2 position-relative">
+        <span class="user-welcome">Bienvenido, {{ current_user.nombre }}</span>
+
+        <div class="dropdown">
+          <button class="btn btn-icon dropdown-toggle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle fs-4 text-white"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+            <li><a class="dropdown-item logout-item" href="/logout">Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    {% else %}
+    <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
+      <span class="navbar-brand">Telemedic</span>
+      <a href="/login" class="btn btn-light fw-semibold">Iniciar sesión</a>
+    </nav>
+    {% endif %}
+
+  
+
+  <!-- Chatbot de Landbot -->
+  <div id="myLandbot"></div>
+  <script SameSite="None; Secure" type="module" src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.mjs"></script>
+  <script type="module">
+    var myLandbot = new Landbot.Container({
+      container: '#myLandbot',
+      configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-2928119-T4MU7NGIKD38COO7/index.json',
+      webhookUrl: 'https://1d6a-201-218-159-21.ngrok-free.app/webhook'
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

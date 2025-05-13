@@ -1,0 +1,389 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #8d6cc7;
+    --primary-hover: #7a59b8;
+    --text-color: #4a5568;
+    --light-text: #8498af;
+    --border-color: #dae2f1;
+    --background-color: #f8fafc;
+    --google-color: #ea5859;
+    --facebook-color: #527ed5;
+    --twitter-color: #61bded;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --input-height: 48px;
+    --border-radius: 8px;
+    --error-color: #e53e3e;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    color: var(--text-color);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    /* Fondo a pantalla completa */
+    background: linear-gradient(rgba(220, 234, 237, 0.8), rgba(220, 234, 237, 0.8)), url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 480px;
+}
+
+.auth-form {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-form:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo img {
+    height: 60px;
+    width: auto;
+}
+
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+}
+
+input {
+    width: 100%;
+    height: var(--input-height);
+    padding: 0 15px 0 40px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(141, 108, 199, 0.15);
+}
+
+input.input-error {
+    border-color: var(--error-color);
+}
+
+.error-message {
+    display: block;
+    color: var(--error-color);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--light-text);
+    cursor: pointer;
+}
+
+.toggle-password:focus {
+    outline: none;
+    color: var(--primary-color);
+}
+
+.remember-forgot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.remember, .terms {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 15px;
+}
+
+.remember input, .terms input {
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.remember:hover input ~ .checkmark, .terms:hover input ~ .checkmark {
+    border-color: var(--primary-color);
+}
+
+.remember input:checked ~ .checkmark, .terms input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.remember input:checked ~ .checkmark:after, .terms input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.remember .checkmark:after, .terms .checkmark:after {
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.forgot-password, .terms-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover, .terms-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.submit-btn {
+    width: 100%;
+    height: var(--input-height);
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+.submit-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(141, 108, 199, 0.3);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+.social-login {
+    margin-top: 30px;
+}
+
+.divider {
+    text-align: center;
+    position: relative;
+    margin-bottom: 20px;
+    color: var(--light-text);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
+
+/* Estilos para el botón oficial de Google Sign-In */
+.g_id_signin {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.social-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.google-btn, .facebook-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    color: white;
+}
+
+.google-btn {
+    background-color: var(--google-color);
+}
+
+.google-btn:hover {
+    background-color: #d83c3d;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(234, 88, 89, 0.3);
+}
+
+.facebook-btn {
+    background-color: var(--facebook-color);
+}
+
+.facebook-btn:hover {
+    background-color: #3b6ac3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(82, 126, 213, 0.3);
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 25px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.auth-link a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .auth-form {
+        padding: 30px 20px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .remember-forgot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .social-buttons {
+        flex-direction: column;
+    }
+
+}
+.flash-messages {
+    list-style-type: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.flash {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.flash.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+}
