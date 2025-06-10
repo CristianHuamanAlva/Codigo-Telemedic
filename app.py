@@ -18,43 +18,49 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-# Ruta para recibir los datos del Webhook (requiere login)
-@app.route('/webhook', methods=['POST'])  # Aquí volvemos a agregar el decorador
-def webhook():
-    
-
+@app.route('/guardar_respuesta', methods=['POST'])
+def guardar_respuesta():
     data = request.get_json()
-
-    # Imprimir los datos del Webhook para verificarlos en consola
-    print("Datos recibidos del Webhook:")
-    print(data)
-
-
-    # Extraer las respuestas del JSON
     nombre = data.get('nombre')
-    opcion = data.get('eleccion')
-    emergencias = data.get('emergencias')
-    sintomas = data.get('sintomas')
-    prevencion = data.get('prevencion')
-    cuidados = data.get('cuidados')
+    opcion = data.get('opcion')
     decision = data.get('decision')
+    
+    # Buscar el usuario por nombre (aunque lo ideal es usar el ID)
+    usuario = Usuario.query.filter_by(nombre=nombre).first()
 
-    # Guardar las respuestas del usuario
-    respuesta = Respuesta(
+    if not usuario:
+        return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+    nueva_respuesta = Respuesta(
         nombre=nombre,
         opcion=opcion,
-        emergencias=emergencias,
-        sintomas=sintomas,
-        prevencion=prevencion,
-        cuidados=cuidados,
         decision=decision,
+        usuario_id=usuario.id
     )
 
-    db.session.add(respuesta)
+    db.session.add(nueva_respuesta)
     db.session.commit()
 
-    return jsonify({'status': 'success'}), 200
+    print(f"Guardado: {nombre} - {opcion} - {decision}")
 
+    return jsonify({"status": "ok"}), 200
+
+@app.route('/guardar_satisfaccion', methods=['POST'])
+def guardar_satisfaccion():
+    data = request.get_json()
+    nombre = data.get('nombre')
+    satisfaccion = data.get('satisfaccion')
+
+    # Buscar la última respuesta de ese usuario
+    respuesta = Respuesta.query.filter_by(nombre=nombre).order_by(Respuesta.id.desc()).first()
+
+    if respuesta:
+        respuesta.satisfaccion = satisfaccion
+        db.session.commit()
+        print(f"Satisfacción guardada: {nombre} - {satisfaccion}")
+        return jsonify({"status": "ok"}), 200
+    else:
+        return jsonify({"status": "error", "message": "Respuesta no encontrada"}), 404
 
 # Ruta para el login
 @app.route('/login', methods=['GET', 'POST'])

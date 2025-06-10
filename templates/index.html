@@ -1,163 +1,413 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport"
+    content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Telemedic | Asistente Virtual</title>
 
   <!-- Bootstrap y Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/index.css">
 
-  <!-- Google Fonts y estilos personalizados -->
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
-
-    :root {
-      --primary-color: #8d6cc7;
-      --background-color: #f8fafc;
-      --text-color: #4a5568;
-      --border-color: #dae2f1;
-      --primary-hover: #7a59b8;
-      --light-text: #8498af;
-      --border-radius: 8px;
-    }
-
-    body {
-      font-family: 'Lato', sans-serif;
-      background-color: var(--background-color);
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar-custom {
-      background-color: var(--primary-color);
-      font-family: 'Montserrat', sans-serif;
-      padding: 10px 20px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .navbar-custom .navbar-brand {
-      color: white;
-      font-weight: 600;
-    }
-
-    .navbar-custom .user-info {
-      color: white;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      position: relative;
-    }
-
-    .navbar-custom .user-info i {
-      font-size: 1.5rem;
-    }
-
-    /* Estilo del texto "Bienvenido" */
-    .user-welcome {
-      font-weight: 500;
-      font-size: 1rem;
-      color: white;
-      background-color: transparent;
-      padding: 8px 12px;
-      border-radius: var(--border-radius);
-    }
-
-    /* Dropdown */
-    .custom-dropdown {
-      background-color: white;
-      border: 1px solid var(--border-color);
-      border-radius: var(--border-radius);
-      min-width: 100%;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-      font-family: 'Lato', sans-serif;
-    }
-
-    .logout-item {
-      color: var(--primary-color);
-      font-weight: 500;
-      padding: 10px 20px;
-      transition: background-color 0.2s ease;
-    }
-
-    .logout-item:hover {
-      background-color: var(--primary-hover);
-      color: white;
-    }
-
-    .dropdown-menu {
-      padding: 0;
-    }
-
-    .dropdown-menu-end {
-      right: 0;
-      left: auto;
-    }
-
-    /* Ajuste de la imagen o icono */
-    .btn-icon {
-      background: none;
-      border: none;
-    }
-
-    .btn-icon:focus {
-      outline: none;
-      box-shadow: none;
-    }
-
-    /* Chatbot container */
-    #myLandbot {
-      margin: 20px auto;
-      width: 100%;
-      max-width: 800px;
-      height: 500px;
-    }
-
-</style>
 </head>
+
 <body>
-
   {% if current_user.is_authenticated %}
-    <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
-      <span class="navbar-brand">Telemedic</span>
-      <div class="user-info d-flex align-items-center gap-2 position-relative">
-        <span class="user-welcome">Bienvenido, {{ current_user.nombre }}</span>
-
-        <div class="dropdown">
-          <button class="btn btn-icon dropdown-toggle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle fs-4 text-white"></i>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
-            <li><a class="dropdown-item logout-item" href="/logout">Cerrar sesión</a></li>
-          </ul>
-        </div>
+  <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
+    <span class="navbar-brand">Telemedic</span>
+    <div class="user-info d-flex align-items-center gap-2 position-relative">
+      <span class="user-welcome">Bienvenido, {{ current_user.nombre }}</span>
+      <div class="dropdown">
+        <button class="btn btn-icon dropdown-toggle p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle fs-4 text-white"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+          <li><a class="dropdown-item logout-item" href="/logout">Cerrar sesión</a></li>
+        </ul>
       </div>
-    </nav>
-    {% else %}
-    <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
-      <span class="navbar-brand">Telemedic</span>
-      <a href="/login" class="btn btn-light fw-semibold">Iniciar sesión</a>
-    </nav>
-    {% endif %}
+    </div>
+  </nav>
+  {% else %}
+  <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
+    <span class="navbar-brand">Telemedic</span>
+    <a href="/login" class="btn btn-light fw-semibold">Iniciar sesión</a>
+  </nav>
+  {% endif %}
 
-  
+  <div class="chat-container d-flex flex-column">
+    <div id="chat" class="p-3 d-flex flex-column"></div>
+  </div>
+  <footer class="custom-footer text-center text-white py-3 mt-5">
+    <div class="container">
+      <p class="mb-1">© 2025 <strong>Telemedic</strong>. Todos los derechos reservados.</p>
+      <p class="mb-1">Elaborado por <strong>Grupo 5</strong> – Estudiantes del curso de <em>Diseño de Productos y
+          Servicios</em>.</p>
+      <p class="mb-0">Versión 1.0 | Asistente virtual para orientación médica accesible</p>
+    </div>
+  </footer>
 
-  <!-- Chatbot de Landbot -->
-  <div id="myLandbot"></div>
-  <script SameSite="None; Secure" type="module" src="https://cdn.landbot.io/landbot-3/landbot-3.0.0.mjs"></script>
-  <script type="module">
-    var myLandbot = new Landbot.Container({
-      container: '#myLandbot',
-      configUrl: 'https://storage.googleapis.com/landbot.online/v3/H-2928119-T4MU7NGIKD38COO7/index.json',
-      webhookUrl: 'https://1d6a-201-218-159-21.ngrok-free.app/webhook'
-    });
+  <script>
+    const userName = "{{ current_user.nombre }}";
+    const chatContainer = document.getElementById('chat');
+
+    let currentStep = 'start';
+    let lastUserAnswer = null;
+
+    const iconMap = {
+      'Síntomas generales': 'bi-thermometer-half',
+      'Cuidado de medicamentos': 'bi-capsule',
+      'Prevención': 'bi-shield-check',
+      'Emergencias': 'bi-exclamation-triangle',
+      'Dolor de cabeza': 'bi-emoji-dizzy',
+      'Fiebre': 'bi-thermometer-sun',
+      'Tos': 'bi-wind',
+      'Malestar general': 'bi-emoji-neutral',
+    };
+    const videoMap = {
+      // Síntomas generales
+      'Dolor de cabeza': 'https://www.w3schools.com/html/mov_bbb.mp4',// 'videos/dolor_cabeza.mp4',
+      'Fiebre': 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
+      'Tos': 'https://samplelib.com/lib/preview/mp4/sample-10s.mp4',
+      'Malestar general': 'https://samplelib.com/lib/preview/mp4/sample-15s.mp4',
+
+      // Cuidado de medicamentos
+      '¿Cómo debo tomar mi pastilla?': 'https://samplelib.com/lib/preview/mp4/sample-20s.mp4',
+      '¿Qué hago si olvidé una dosis?': 'https://samplelib.com/lib/preview/mp4/sample-30s.mp4',
+      '¿Puedo tomar 2 pastillas juntas?': 'https://samplelib.com/lib/preview/mp4/sample-40s.mp4',
+      '¿Qué medicamentos no debo mezclar?': 'https://samplelib.com/lib/preview/mp4/sample-50s.mp4',
+
+      // Prevención
+      '¿Cómo puedo evitar un resfriado?': 'https://samplelib.com/lib/preview/mp4/sample-1mb.mp4',
+      '¿Qué hago para cuidar mi salud todos los días?': '/static/videos/prevenir.mp4',
+      '¿Por qué es importante lavarse las manos?': 'https://samplelib.com/lib/preview/mp4/sample-3mb.mp4',
+      '¿Debo vacunarme?': '/static/videos/vacuna.mp4',
+
+      // Emergencias
+      '¿Qué hago si alguien se desmaya?': 'https://samplelib.com/lib/preview/mp4/sample-5mb.mp4',
+      '¿Cómo actuar ante una convulsión?': 'https://samplelib.com/lib/preview/mp4/sample-7mb.mp4',
+      '¿Qué hacer si hay dificultad para respirar?': 'https://samplelib.com/lib/preview/mp4/sample-9mb.mp4',
+      '¿Cuándo debo ir a emergencias?': 'https://samplelib.com/lib/preview/mp4/sample-10mb.mp4'
+    };
+
+
+
+    const steps = {
+      start: () => {
+        addMessage(`¡Hola ${userName}! Soy Telemedic, tu asistente virtual para orientación médica accesible🧑‍⚕🤝 ¿Estás listo para comenzar?`, 'bot', () => {
+          nextStep('consultas');
+        });
+      },
+      consultas: () => {
+        addMessage('¿En qué tema de salud deseas recibir orientación hoy?', 'bot', () => {
+          showOptions(['Elegir de una lista', 'Escribir mi duda'], (respuesta) => {
+            if (respuesta === 'Elegir de una lista') {
+              showOptions(['Síntomas generales', 'Cuidado de medicamentos', 'Prevención', 'Emergencias'], (tema) => {
+                lastUserAnswer = tema;
+                if (tema === 'Síntomas generales') nextStep('sintomas');
+                else if (tema === 'Cuidado de medicamentos') nextStep('medicamentos');
+                else if (tema === 'Prevención') nextStep('prevencion');
+                else if (tema === 'Emergencias') nextStep('emergencias');
+              });
+            } else {
+              nextStep('entradaLibre');
+            }
+          });
+        });
+      },
+      entradaLibre: () => {
+        addMessage('Escribe tu duda médica y te responderé en Lengua de Señas Peruana:', 'bot', () => {
+          showInputText((textoIngresado) => {
+            lastUserAnswer = textoIngresado;
+
+
+            const categoriaDetectada = clasificarDuda(textoIngresado);
+
+            if (categoriaDetectada) {
+              nextStep(categoriaDetectada); // Redirige correctamente
+            } else {
+              addMessage('Lo siento, no entendí tu consulta. ¿Puedes intentar reformularla o elegir una opción de la lista?', 'bot', () => {
+                nextStep('consultas');
+              });
+            }
+          });
+        });
+      },
+
+
+      sintomas: () => {
+        addMessage(`Has seleccionado "${lastUserAnswer}". ¿Qué síntoma deseas consultar?`, 'bot', () => {
+          showOptions(['Dolor de cabeza', 'Fiebre', 'Tos', 'Malestar general'], (respuesta) => {
+            guardarRespuesta(userName, 'Síntomas generales', respuesta);
+            handleVideo(respuesta); // sigue con tu lógica de mostrar video
+          });
+        });
+      },
+      medicamentos: () => {
+        addMessage(`Has seleccionado "${lastUserAnswer}". ¿Sobre qué deseas consultar?`, 'bot', () => {
+          showOptions(['¿Cómo debo tomar mi pastilla?', '¿Qué hago si olvidé una dosis?', '¿Puedo tomar 2 pastillas juntas?', '¿Qué medicamentos no debo mezclar?'], (respuesta) => {
+            guardarRespuesta(userName, 'Cuidado de medicamentos', respuesta);
+            handleVideo(respuesta);
+          });
+        });
+      },
+      prevencion: () => {
+        addMessage(`Has seleccionado "${lastUserAnswer}". ¿Sobre qué deseas consultar?`, 'bot', () => {
+          showOptions(['¿Cómo puedo evitar un resfriado?', '¿Qué hago para cuidar mi salud todos los días?', '¿Por qué es importante lavarse las manos?', '¿Debo vacunarme?'], (respuesta) => {
+            guardarRespuesta(userName, 'Prevención', respuesta);
+            handleVideo(respuesta);
+          });
+        });
+      },
+      emergencias: () => {
+        addMessage(`Has seleccionado "${lastUserAnswer}". ¿Sobre qué deseas consultar?`, 'bot', () => {
+          showOptions(['¿Qué hago si alguien se desmaya?', '¿Cómo actuar ante una convulsión?', '¿Qué hacer si hay dificultad para respirar?', '¿Cuándo debo ir a emergencias?'], (respuesta) => {
+            guardarRespuesta(userName, 'Emergencias', respuesta);
+            handleVideo(respuesta);
+          });
+        });
+      }
+    };
+
+    function addMessage(content, sender = 'bot', callback) {
+      const wrapper = document.createElement('div');
+      wrapper.className = `chat-message ${sender}`;
+
+      const card = document.createElement('div');
+      card.className = 'card-mensaje';
+      // Si el emisor es el bot, añadir imagen de doctor
+      if (sender === 'bot') {
+        const icon = document.createElement('img');
+        icon.src = 'static/img/icono-doctor.png'; // ← reemplaza con la ruta correcta
+        icon.alt = 'Doctor';
+        icon.className = 'icono-bot';     // ← se puede usar para estilo CSS
+        wrapper.appendChild(icon);
+      }
+      if (typeof content === 'string') {
+        card.textContent = content;
+      } else {
+        card.appendChild(content); // ← botón HTML
+      }
+
+      wrapper.appendChild(card);
+      chatContainer.appendChild(wrapper);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      if (callback) setTimeout(callback, 400);
+    }
+
+
+
+    function showOptions(options, callback) {
+      const btnGroup = document.createElement('div');
+      btnGroup.className = 'chat-buttons';
+
+      options.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'chat-button-option';
+        const icon = document.createElement('i');
+        icon.className = `bi ${iconMap[opt] || 'bi-chat-text'}`;
+        btn.appendChild(icon);
+        btn.appendChild(document.createTextNode(opt));
+
+        // Agregar el color de fondo según el orden
+        btn.style.backgroundColor = getComputedStyle(document.documentElement)
+          .getPropertyValue(`--button${index + 1}`).trim();
+
+        btn.onclick = () => {
+          if (btnGroup.parentNode) btnGroup.remove();
+          lastUserAnswer = opt;
+
+
+          // Clonar el botón y enviarlo como mensaje
+          const clonedBtn = btn.cloneNode(true);
+          addMessage(clonedBtn, 'user'); // ← pasar como elemento, no texto
+          callback(opt);
+        };
+
+        btnGroup.appendChild(btn);
+      });
+
+      chatContainer.appendChild(btnGroup);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    function clasificarDuda(texto) {
+      const textoLower = texto.toLowerCase();
+
+      if (
+        textoLower.includes('dolor') || textoLower.includes('fiebre') || textoLower.includes('tos') ||
+        textoLower.includes('malestar') || textoLower.includes('mareo') || textoLower.includes('náusea') ||
+        textoLower.includes('cansancio') || textoLower.includes('vómito') || textoLower.includes('resfrío') ||
+        textoLower.includes('escalofríos') || textoLower.includes('síntoma') || textoLower.includes('congestión')
+      ) {
+        return 'sintomas';
+      } else if (
+        textoLower.includes('pastilla') || textoLower.includes('dosis') || textoLower.includes('medicamento') ||
+        textoLower.includes('medicación') || textoLower.includes('tomar') || textoLower.includes('receta') ||
+        textoLower.includes('tratamiento') || textoLower.includes('jarabe') || textoLower.includes('inyectar') ||
+        textoLower.includes('inyección') || textoLower.includes('efectos secundarios')
+      ) {
+        return 'medicamentos';
+      } else if (
+        textoLower.includes('prevenir') || textoLower.includes('evitar') || textoLower.includes('vacunar') ||
+        textoLower.includes('lavarse') || textoLower.includes('higiene') || textoLower.includes('cuidados') ||
+        textoLower.includes('proteger') || textoLower.includes('alimentación') || textoLower.includes('saludable') ||
+        textoLower.includes('prevención') || textoLower.includes('infección')
+      ) {
+        return 'prevencion';
+      } else if (
+        textoLower.includes('emergencia') || textoLower.includes('convulsión') || textoLower.includes('desmaya') ||
+        textoLower.includes('respirar') || textoLower.includes('urgencia') || textoLower.includes('accidente') ||
+        textoLower.includes('sangrado') || textoLower.includes('fractura') || textoLower.includes('paro') ||
+        textoLower.includes('intoxicación') || textoLower.includes('quemadura') || textoLower.includes('ahogo')
+      ) {
+        return 'emergencias';
+      }
+
+      return null; // Si no reconoce nada
+    }
+
+
+    function handleVideo(opcion) {
+      lastUserAnswer = opcion;
+
+      // Obtener el video correspondiente a la opción
+      const videoSrc = videoMap[opcion] || 'https://www.w3schools.com/html/mov_bbb.mp4'; // Video por defecto si no se encuentra
+
+      addMessage(`Has seleccionado "${opcion}". A continuación, te mostraré un video en Lengua de Señas Peruana donde se explica qué debes saber.`, 'bot', () => {
+        const video = document.createElement('video');
+        video.src = videoSrc;
+        video.controls = true;
+        video.style.width = '100%';
+
+        // Insertar el video como mensaje del bot (mantiene estilo)
+        addMessage(video, 'bot', () => {
+          // Luego del video, preguntar satisfacción
+          preguntarSatisfaccion(() => {
+            // Y luego mostrar botones finales
+            mostrarBotonesFinal();
+          });
+        });
+      });
+    }
+    function showInputText(callback) {
+      const container = document.createElement('div');
+      const input = document.createElement('textarea');
+      input.placeholder = 'Escribe tu duda aquí...';
+      input.className = 'form-control';
+      input.rows = 3;
+
+      const button = document.createElement('button');
+      button.textContent = 'Enviar';
+      button.className = 'btn btn-success mt-2';
+      button.onclick = () => {
+        const texto = input.value.trim();
+        if (texto) {
+          addMessage(texto, 'user');
+          container.remove();
+          callback(texto);
+        }
+      };
+
+      container.appendChild(input);
+      container.appendChild(button);
+      document.getElementById('chat').appendChild(container);
+    }
+
+    function mostrarBotonesFinal() {
+      const finalBtns = document.createElement('div');
+      finalBtns.className = 'chat-buttons mt-2';
+
+      const otraConsulta = document.createElement('button');
+      otraConsulta.innerHTML = '<i class="bi bi-arrow-repeat"></i> Otra consulta';
+      otraConsulta.onclick = () => {
+        finalBtns.remove();
+        addMessage('Consulta anterior: ' + lastUserAnswer, 'bot');
+        nextStep('consultas');
+      };
+
+      const finalizar = document.createElement('button');
+      finalizar.innerHTML = '<i class="bi bi-door-closed"></i> Finalizar consulta';
+      finalizar.onclick = () => {
+        finalBtns.remove();
+        addMessage('Gracias por usar Telemedic. ¡Cuida tu salud! 💜', 'bot');
+      };
+
+      finalBtns.appendChild(otraConsulta);
+      finalBtns.appendChild(finalizar);
+      chatContainer.appendChild(finalBtns);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+
+    function nextStep(step) {
+      currentStep = step;
+      steps[step]();
+    }
+
+    function preguntarSatisfaccion(callbackFinal) {
+      const opciones = ['Muy satisfecho', 'Satisfecho', 'Poco Satisfecho', 'Nada Satisfecho'];
+
+      addMessage("¿Qué tan satisfecho estás con la ayuda mostrada?", 'bot', () => {
+        showOptions(opciones, (respuestaSatisfaccion) => {
+          guardarSatisfaccion(userName, respuestaSatisfaccion);
+          callbackFinal(); // Continuar con botones finales
+        });
+      });
+    }
+
+
+    function guardarRespuesta(nombre, opcion, decision) {
+      fetch('/guardar_respuesta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          opcion: opcion,
+          decision: decision
+        })
+      })
+        .then(response => {
+          if (response.ok) {
+            console.log("Respuesta guardada correctamente");
+          } else {
+            console.error("Error al guardar la respuesta");
+          }
+        })
+        .catch(error => console.error("Error en fetch:", error));
+    }
+    function guardarSatisfaccion(nombre, satisfaccion) {
+      fetch('/guardar_satisfaccion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nombre: nombre,
+          satisfaccion: satisfaccion
+        })
+      })
+        .then(response => {
+          if (response.ok) {
+            console.log("Satisfacción guardada correctamente");
+          } else {
+            console.error("Error al guardar satisfacción");
+          }
+        })
+        .catch(error => console.error("Error en fetch de satisfacción:", error));
+    }
+
+
+    window.onload = () => {
+      steps[currentStep]();
+    };
   </script>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html>
 
+</html>
