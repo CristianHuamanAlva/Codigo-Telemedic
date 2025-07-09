@@ -1,5 +1,6 @@
 from flask_login import UserMixin
 from extensiones import db
+from sqlalchemy import Text  # ✅ Este es el import que faltaba
 
 class Usuario(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -21,6 +22,8 @@ class Respuesta(db.Model):
     decision = db.Column(db.String(150))
     satisfaccion = db.Column(db.String(50))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+
+    historial_chat = db.Column(Text)  # Nueva columna para guardar el chat completo (en JSON)
 
 
 

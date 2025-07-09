@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import Usuario, Respuesta
 from extensiones import db, login_manager
 from config import Config
+import json
+
 
 
 # Inicializar Flask
@@ -24,7 +26,8 @@ def guardar_respuesta():
     nombre = data.get('nombre')
     opcion = data.get('opcion')
     decision = data.get('decision')
-    
+    historial = data.get('historial')  # 👈 nuevo campo recibido
+
     # Buscar el usuario por nombre (aunque lo ideal es usar el ID)
     usuario = Usuario.query.filter_by(nombre=nombre).first()
 
@@ -35,6 +38,7 @@ def guardar_respuesta():
         nombre=nombre,
         opcion=opcion,
         decision=decision,
+        historial_chat=json.dumps(historial),  # 👈 convertimos el historial a JSON string
         usuario_id=usuario.id
     )
 
@@ -44,6 +48,7 @@ def guardar_respuesta():
     print(f"Guardado: {nombre} - {opcion} - {decision}")
 
     return jsonify({"status": "ok"}), 200
+
 
 @app.route('/guardar_satisfaccion', methods=['POST'])
 def guardar_satisfaccion():
@@ -58,9 +63,28 @@ def guardar_satisfaccion():
         respuesta.satisfaccion = satisfaccion
         db.session.commit()
         print(f"Satisfacción guardada: {nombre} - {satisfaccion}")
+        
         return jsonify({"status": "ok"}), 200
     else:
         return jsonify({"status": "error", "message": "Respuesta no encontrada"}), 404
+    
+@app.route('/historial_respuestas')
+@login_required
+def historial_respuestas():
+    respuestas = Respuesta.query.filter_by(usuario_id=current_user.id).all()
+
+    historial = []
+    for i, r in enumerate(respuestas, start=1):
+        historial.append({
+            "id": r.id,  # 👈 Necesario para poder hacer fetch del historial completo
+            "titulo": f"Consulta {i}",
+            "opcion": r.opcion,
+            "decision": r.decision,
+            "satisfaccion": r.satisfaccion
+        })
+
+    return jsonify(historial)
+
 
 # Ruta para el login
 @app.route('/login', methods=['GET', 'POST'])
@@ -121,6 +145,45 @@ def register():
     
     return render_template('register.html')
 
+@app.route('/obtener_historial/<int:respuesta_id>')
+@login_required
+def obtener_historial(respuesta_id):
+    respuesta = Respuesta.query.filter_by(id=respuesta_id, usuario_id=current_user.id).first()
+
+    if not respuesta:
+        return jsonify({"error": "No encontrada"}), 404
+
+    mensajes = []
+
+    # Mensaje del usuario
+    if respuesta.decision:
+        mensajes.append({
+            "emisor": "user",
+            "contenido": respuesta.decision
+        })
+
+    # Mensaje del bot antes del video
+    mensajes.append({
+        "emisor": "bot",
+        "contenido": f'Has seleccionado "{respuesta.decision}". Aquí está el video correspondiente.'
+    })
+
+    # Video como mensaje especial (puedes usar HTML del lado del cliente)
+    mensajes.append({
+        "emisor": "bot",
+        "contenido": f"[VIDEO:{respuesta.decision}]"
+    })
+
+    # Satisfacción (si existe)
+    if respuesta.satisfaccion:
+        mensajes.append({
+            "emisor": "bot",
+            "contenido": f"Satisfacción: {respuesta.satisfaccion}"
+        })
+
+    return jsonify(mensajes)
+
+
 # Ruta para el dashboard
 @app.route('/dashboard')
 @login_required
@@ -138,6 +201,7 @@ def logout():
 @app.route('/')
 def index():
     return render_template('index.html',user=current_user)
+
 
 # Cargar el usuario por ID
 @login_manager.user_loader

@@ -14,7 +14,9 @@
 
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
+
+  <!-- NAVBAR (arriba del todo) -->
   {% if current_user.is_authenticated %}
   <nav class="navbar navbar-custom d-flex justify-content-between align-items-center">
     <span class="navbar-brand">Telemedic</span>
@@ -37,10 +39,33 @@
   </nav>
   {% endif %}
 
-  <div class="chat-container d-flex flex-column">
-    <div id="chat" class="p-3 d-flex flex-column"></div>
+  <!-- CONTENIDO PRINCIPAL: Sidebar + Chat -->
+  <div class="d-flex flex-grow-1 position-relative">
+    {% if current_user.is_authenticated %}
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar bg-light p-3">
+      <div class="sidebar-header d-flex justify-content-between align-items-center mb-3">
+        <h5 class="m-0">Historial</h5>
+      </div>
+      <ul id="historial-lista" class="list-unstyled"></ul>
+    </div>
+
+    <!-- BOTÓN TOGGLE flotante -->
+    <button id="toggleSidebar" class="toggle-sidebar-button" title="Ocultar historial">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    {% endif %}
+
+    <!-- CONTENEDOR PRINCIPAL DEL CHAT -->
+    <div id="main-container" class="flex-grow-1 d-flex flex-column">
+      <div class="chat-container d-flex flex-column">
+        <div id="chat" class="p-3 d-flex flex-column"></div>
+      </div>
+    </div>
   </div>
-  <footer class="custom-footer text-center text-white py-3 mt-5">
+
+  <!-- FOOTER FUERA del contenedor principal para ocupar todo el ancho -->
+  <footer class="custom-footer text-center text-white py-3 mt-0">
     <div class="container">
       <p class="mb-1">© 2025 <strong>Telemedic</strong>. Todos los derechos reservados.</p>
       <p class="mb-1">Elaborado por <strong>Grupo 5</strong> – Estudiantes del curso de <em>Diseño de Productos y
@@ -56,6 +81,8 @@
     let currentStep = 'start';
     let lastUserAnswer = null;
 
+    let historialChat = [];
+
     const iconMap = {
       'Síntomas generales': 'bi-thermometer-half',
       'Cuidado de medicamentos': 'bi-capsule',
@@ -68,10 +95,10 @@
     };
     const videoMap = {
       // Síntomas generales
-      'Dolor de cabeza': 'https://www.w3schools.com/html/mov_bbb.mp4',// 'videos/dolor_cabeza.mp4',
-      'Fiebre': 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
-      'Tos': 'https://samplelib.com/lib/preview/mp4/sample-10s.mp4',
-      'Malestar general': 'https://samplelib.com/lib/preview/mp4/sample-15s.mp4',
+      'Dolor de cabeza': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1751995308/dolor_de_cabeza_tg4d39.mp4',// 'videos/dolor_cabeza.mp4',
+      'Fiebre': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1751995469/fiebre_ymp5cq.mp4',
+      'Tos': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1751995572/tos_vcjtuw.mp4',
+      'Malestar general': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1751995533/malestar_general_uli0zs.mp4',
 
       // Cuidado de medicamentos
       '¿Cómo debo tomar mi pastilla?': 'https://samplelib.com/lib/preview/mp4/sample-20s.mp4',
@@ -82,14 +109,59 @@
       // Prevención
       '¿Cómo puedo evitar un resfriado?': 'https://samplelib.com/lib/preview/mp4/sample-1mb.mp4',
       '¿Qué hago para cuidar mi salud todos los días?': '/static/videos/prevenir.mp4',
-      '¿Por qué es importante lavarse las manos?': 'https://samplelib.com/lib/preview/mp4/sample-3mb.mp4',
-      '¿Debo vacunarme?': '/static/videos/vacuna.mp4',
+      '¿Por qué es importante lavarse las manos?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020311/porque-es-importante-lavarse-las-manos_wpssw2.mp4',
+      '¿Debo vacunarme?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020314/debo-vacunarme_uy2ntb.mp4',
 
       // Emergencias
-      '¿Qué hago si alguien se desmaya?': 'https://samplelib.com/lib/preview/mp4/sample-5mb.mp4',
-      '¿Cómo actuar ante una convulsión?': 'https://samplelib.com/lib/preview/mp4/sample-7mb.mp4',
-      '¿Qué hacer si hay dificultad para respirar?': 'https://samplelib.com/lib/preview/mp4/sample-9mb.mp4',
-      '¿Cuándo debo ir a emergencias?': 'https://samplelib.com/lib/preview/mp4/sample-10mb.mp4'
+      '¿Qué hago si alguien se desmaya?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020321/que-hago-si-alguien-se-desmaya_uxtzcw.mp4',
+      '¿Cómo actuar ante una convulsión?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020309/como-actuar-ante-una-convulsion_bbxnaz.mp4',
+      '¿Qué hacer si hay dificultad para respirar?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020312/que-hacer-si-hay-dificultad-para-respirar_wnahd3.mp4',
+      '¿Cuándo debo ir a emergencias?': 'https://res.cloudinary.com/dwacjvsdx/video/upload/v1752020309/cuando-debo-ir-a-emergencias_lxdpnf.mp4'
+    };
+
+    const preguntasFrecuentes = [
+      {
+        pregunta: "¿Qué es Telemedic?",
+        respuesta: "Es un asistente virtual accesible que orienta en temas médicos usando videos en Lengua de Señas Peruana."
+      },
+      {
+        pregunta: "¿Cómo funciona?",
+        respuesta: "Seleccionas un tema de salud, eliges una duda o escribes la tuya y el sistema te muestra orientación en video."
+      },
+      {
+        pregunta: "¿Puedo hacer otra consulta?",
+        respuesta: "Sí, al final de cada video puedes elegir 'Otra consulta' para comenzar nuevamente."
+      },
+      {
+        pregunta: "¿Qué pasa si no entiendo la respuesta?",
+        respuesta: "Podras leer la transcripción del video para poder entender mejor que hacer en esas situaciones."
+      }
+    ];
+    // Se crean las constanstes de las transcripciones del video
+    const transcripciones = {
+      // Síntomas generales
+      'Dolor de cabeza': 'El dolor de cabeza puede tener muchas causas. Para aliviarlo, descansa, mantente hidratado y evita ruidos fuertes. Si persiste, consulta a un médico.',
+      'Fiebre': 'La fiebre es una señal de que el cuerpo está combatiendo una infección. Mantente hidratado, usa ropa ligera y consulta si supera los 39°C.',
+      'Tos': 'La tos ayuda a limpiar las vías respiratorias. Toma líquidos tibios, evita el polvo y consulta si dura más de una semana.',
+      'Malestar general': 'El malestar general puede indicar una gripe o fatiga. Descansa, aliméntate bien y si empeora, busca atención médica.',
+
+      // Cuidado de medicamentos
+      '¿Cómo debo tomar mi pastilla?': 'Sigue siempre las indicaciones del médico o del envase. Tómala con agua y a la misma hora cada día si es posible.',
+      '¿Qué hago si olvidé una dosis?': 'Tómala apenas lo recuerdes, pero si falta poco para la siguiente dosis, sáltala. No tomes doble dosis.',
+      '¿Puedo tomar 2 pastillas juntas?': 'Solo si el médico lo indica. Tomar más de lo recetado puede ser peligroso.',
+      '¿Qué medicamentos no debo mezclar?': 'Algunos medicamentos pueden causar efectos negativos si se combinan. Consulta siempre antes de mezclar pastillas.',
+
+      // Prevención
+      '¿Cómo puedo evitar un resfriado?': 'Lávate las manos con frecuencia, evita el contacto cercano con personas enfermas y mantén una buena alimentación.',
+      '¿Qué hago para cuidar mi salud todos los días?': 'Come balanceado, haz ejercicio, duerme bien y mantén una buena higiene personal.',
+      '¿Por qué es importante lavarse las manos?': 'Lavarse las manos con agua y jabón elimina gérmenes, bacterias y virus que pueden causar enfermedades como gripe, diarrea o COVID. Es una forma muy simple y efectiva de proteger tu salud y la de los demás. Se debe hacer antes de comer, después de ir al baño y al llegar de la calle. Si no hay agua, se puede usar alcohol en gel. Es un hábito pequeño, pero muy poderoso.',
+      '¿Debo vacunarme?': 'Sí, vacunarse es muy importante. Las vacunas enseñan al cuerpo a defenderse contra enfermedades graves como el sarampión, el tétanos o el COVID. Protegen no solo a ti, sino también a otras personas, como bebés, personas mayores o con enfermedades. Algunas vacunas son obligatorias y otras recomendadas, pero todas ayudan a prevenir contagios. Son seguras, y los efectos secundarios son leves y temporales.',
+
+      // Emergencias
+      '¿Qué hago si alguien se desmaya?': 'Primero, revisa si respira. Si sí, acuesta a la persona boca arriba, eleva sus piernas para que la sangre suba al cerebro y afloja su ropa. Asegúrate de que haya aire. No le des comida ni agua. Si no reacciona en un minuto, llama al 911 o servicio de emergencias. Quédate con la persona hasta que despierte o llegue ayuda. Si vomita, colócala de lado para evitar que se ahogue.',
+      '¿Cómo actuar ante una convulsión?': 'Mantén la calma. No sujetes a la persona ni pongas nada en su boca. Protégela de objetos cercanos para que no se lastime. Ponla de lado si es posible, y fíjate cuánto dura la convulsión. Si pasa de 5 minutos o es la primera vez que ocurre, llama al 911. Cuando termine, quédate con la persona. Puede estar confundida o muy cansada. Dale tiempo para recuperarse.',
+      '¿Qué hacer si hay dificultad para respirar?': 'Ayuda a la persona a sentarse, no recostarse. Afloja su ropa. Si tiene inhalador, dáselo. Si no mejora en pocos minutos, llama a emergencias. Mientras tanto, tranquilízala. Si la persona se pone azul, se desmaya o deja de respirar, inicia RCP si sabes hacerlo. La dificultad para respirar puede ser por asma, alergias o problemas cardíacos, así que actúa rápido.',
+      '¿Cuándo debo ir a emergencias?': 'Ve a emergencias si tienes dolor muy fuerte, sangrado que no para, dificultad para respirar, desmayos, fiebre muy alta, vómitos persistentes o confusión. También si hay una herida profunda, quemadura grave o un accidente fuerte. No esperes a que empeore. Si no estás seguro, es mejor ir y que un médico lo revise. Es mejor prevenir que lamentar.'
     };
 
 
@@ -177,27 +249,50 @@
 
       const card = document.createElement('div');
       card.className = 'card-mensaje';
-      // Si el emisor es el bot, añadir imagen de doctor
+
       if (sender === 'bot') {
         const icon = document.createElement('img');
-        icon.src = 'static/img/icono-doctor.png'; // ← reemplaza con la ruta correcta
+        icon.src = 'static/img/icono-doctor.png';
         icon.alt = 'Doctor';
-        icon.className = 'icono-bot';     // ← se puede usar para estilo CSS
+        icon.className = 'icono-bot';
         wrapper.appendChild(icon);
       }
-      if (typeof content === 'string') {
+
+      // 🔥 MOSTRAR VIDEO desde historial o marcado
+      if (typeof content === 'string' && content.startsWith('[VIDEO:')) {
+        const clave = content.replace('[VIDEO:', '').replace(']', '').trim();
+        const videoSrc = videoMap[clave];
+
+        if (videoSrc) {
+          const video = document.createElement('video');
+          video.src = videoSrc;
+          video.controls = true;
+          video.className = 'chat-video'; // Aplica estilo CSS
+          card.appendChild(video);
+        } else {
+          card.textContent = '⚠️ Video no encontrado';
+        }
+
+        // 🔥 Si es string, mostrar como texto
+      } else if (typeof content === 'string') {
         card.textContent = content;
-      } else {
-        card.appendChild(content); // ← botón HTML
+
+        // 🔥 Si es un nodo HTML como botón, video, etc.
+      } else if (content instanceof HTMLElement) {
+        card.appendChild(content);
       }
 
       wrapper.appendChild(card);
-      chatContainer.appendChild(wrapper);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+      chatContainer.appendChild(wrapper); // se mantiene igual
+
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: "smooth"
+      });
+
 
       if (callback) setTimeout(callback, 400);
     }
-
 
 
     function showOptions(options, callback) {
@@ -207,32 +302,54 @@
       options.forEach((opt, index) => {
         const btn = document.createElement('button');
         btn.className = 'chat-button-option';
+        btn.dataset.button = index + 1; // 👈 GUARDAR número del botón
+
         const icon = document.createElement('i');
         icon.className = `bi ${iconMap[opt] || 'bi-chat-text'}`;
         btn.appendChild(icon);
-        btn.appendChild(document.createTextNode(opt));
+        btn.appendChild(document.createTextNode(` ${opt}`));
 
-        // Agregar el color de fondo según el orden
-        btn.style.backgroundColor = getComputedStyle(document.documentElement)
+        // Asignar color usando la variable CSS
+        const bgColor = getComputedStyle(document.documentElement)
           .getPropertyValue(`--button${index + 1}`).trim();
+        btn.style.backgroundColor = bgColor;
 
         btn.onclick = () => {
           if (btnGroup.parentNode) btnGroup.remove();
           lastUserAnswer = opt;
 
+          // Crear botón de usuario con MISMO número
+          const userBtn = document.createElement('button');
+          userBtn.className = btn.className;
+          userBtn.innerHTML = btn.innerHTML;
+          userBtn.disabled = true;
 
-          // Clonar el botón y enviarlo como mensaje
-          const clonedBtn = btn.cloneNode(true);
-          addMessage(clonedBtn, 'user'); // ← pasar como elemento, no texto
+          const buttonNumber = btn.dataset.button; // 👈 recuperar el número
+          const finalBgColor = getComputedStyle(document.documentElement)
+            .getPropertyValue(`--button${buttonNumber}`).trim();
+          userBtn.style.backgroundColor = finalBgColor;
+
+          // Copiar otros estilos visuales
+          const computedStyle = getComputedStyle(btn);
+          userBtn.style.color = '#000'; // 👈 Esto forza el texto negro
+          userBtn.style.fontWeight = computedStyle.fontWeight;
+          userBtn.style.borderRadius = computedStyle.borderRadius;
+          userBtn.style.boxShadow = computedStyle.boxShadow;
+          userBtn.style.padding = computedStyle.padding;
+          userBtn.style.fontFamily = computedStyle.fontFamily;
+
+          addMessage(userBtn, 'user');
           callback(opt);
         };
 
         btnGroup.appendChild(btn);
       });
 
+
       chatContainer.appendChild(btnGroup);
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+
     function clasificarDuda(texto) {
       const textoLower = texto.toLowerCase();
 
@@ -268,7 +385,215 @@
 
       return null; // Si no reconoce nada
     }
+    function cargarHistorial() {
+      fetch('/historial_respuestas')
+        .then(res => res.json())
+        .then(data => {
+          const lista = document.getElementById('historial-lista');
+          lista.innerHTML = '';
+          // Botón Preguntas frecuentes
+          const faqBtn = document.createElement('button');
+          faqBtn.textContent = 'Preguntas frecuentes';
+          faqBtn.className = 'btn btn-outline-success w-100 mb-2 fw-semibold';
+          faqBtn.onclick = mostrarFAQ;
+          lista.appendChild(faqBtn);
 
+          // Botón "Nuevo chat"
+          const nuevoChatBtn = document.createElement('button');
+          nuevoChatBtn.textContent = '🆕 Nuevo chat';
+          nuevoChatBtn.className = 'btn btn-success w-100 mb-3 fw-semibold';
+          nuevoChatBtn.onclick = () => {
+            chatContainer.innerHTML = '';
+            currentStep = 'start';
+            steps['start']();
+          };
+          lista.appendChild(nuevoChatBtn);
+
+          data.forEach((item, i) => {
+            const li = document.createElement('li');
+            li.className = 'mb-2';
+
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline-primary w-100 text-start fw-semibold';
+            btn.innerHTML = `<strong>${item.titulo}: ${item.opcion}</strong>`;
+
+            btn.onclick = () => {
+              fetch(`/obtener_historial/${item.id}`)
+                .then(res => res.json())
+                .then(historial => {
+                  renderConversacion(historial, item, i);  // 👈 Pasamos el índice también
+                });
+            };
+
+            li.appendChild(btn);
+            lista.appendChild(li);
+          });
+        });
+    }
+
+    function renderConversacion(historial, item, indexGlobal) {
+      document.getElementById('chat').innerHTML = '';
+
+      const decisionColorMap = {
+        'Dolor de cabeza': '--button1',
+        'Fiebre': '--button2',
+        'Tos': '--button3',
+        'Malestar general': '--button4',
+
+        '¿Cómo debo tomar mi pastilla?': '--button1',
+        '¿Qué hago si olvidé una dosis?': '--button2',
+        '¿Puedo tomar 2 pastillas juntas?': '--button3',
+        '¿Qué medicamentos no debo mezclar?': '--button4',
+
+        '¿Cómo puedo evitar un resfriado?': '--button1',
+        '¿Qué hago para cuidar mi salud todos los días?': '--button2',
+        '¿Por qué es importante lavarse las manos?': '--button3',
+        '¿Debo vacunarme?': '--button4',
+
+        '¿Qué hago si alguien se desmaya?': '--button1',
+        '¿Cómo actuar ante una convulsión?': '--button2',
+        '¿Qué hacer si hay dificultad para respirar?': '--button3',
+        '¿Cuándo debo ir a emergencias?': '--button4',
+
+        'Muy satisfecho': '--button1',
+        'Satisfecho': '--button2',
+        'Poco Satisfecho': '--button3',
+        'Nada Satisfecho': '--button4'
+
+      };
+
+      const iconMap = {
+        'Dolor de cabeza': 'bi-emoji-dizzy',
+        'Fiebre': 'bi-thermometer-sun',
+        'Tos': 'bi-wind',
+        'Malestar general': 'bi-emoji-neutral',
+
+        'Síntomas generales': 'bi-thermometer-half',
+        'Cuidado de medicamentos': 'bi-capsule',
+        'Prevención': 'bi-shield-check',
+        'Emergencias': 'bi-exclamation-triangle',
+
+        // Satisfacción
+        'Muy satisfecho': 'bi-emoji-heart-eyes',
+        'Satisfecho': 'bi-emoji-smile',
+        'Poco Satisfecho': 'bi-emoji-neutral',
+        'Nada Satisfecho': 'bi-emoji-frown'
+      };
+
+      const temaColorMap = {
+        'Síntomas generales': '--button1',
+        'Cuidado de medicamentos': '--button2',
+        'Prevención': '--button3',
+        'Emergencias': '--button4'
+      };
+
+      const colorVarTema = temaColorMap[item.opcion] || '--button1';
+      const colorTema = getComputedStyle(document.documentElement)
+        .getPropertyValue(colorVarTema).trim();
+
+      const decisionColorVar = decisionColorMap[item.decision] || '--button5';
+      const colorDecision = getComputedStyle(document.documentElement)
+        .getPropertyValue(decisionColorVar).trim();
+
+      const colorSatisfaccion = getComputedStyle(document.documentElement)
+        .getPropertyValue('--button6').trim();
+
+      addMessage(`¡Hola ${userName}! Soy Telemedic, tu asistente virtual para orientación médica accesible🧑‍⚕🤝 ¿Estás listo para comenzar?`, 'bot', () => {
+        addMessage("¿En qué tema de salud deseas recibir orientación hoy?", 'bot', () => {
+
+          // BOTÓN DE TEMA (OPCIÓN PRINCIPAL)
+          const temaBtn = document.createElement('button');
+          temaBtn.className = 'chat-button-option';
+          temaBtn.disabled = true;
+
+          const temaIcon = document.createElement('i');
+          const temaIcono = iconMap.hasOwnProperty(item.opcion) ? iconMap[item.opcion] : 'bi-chat-text';
+          temaIcon.className = `bi ${temaIcono}`;
+
+          temaBtn.appendChild(temaIcon);
+          temaBtn.appendChild(document.createTextNode(` ${item.opcion}`));
+
+          temaBtn.style.backgroundColor = colorTema;
+          temaBtn.style.color = '#000';
+
+          addMessage(temaBtn, 'user', () => {
+            addMessage(`Has seleccionado "${item.opcion}". ¿Sobre qué deseas consultar?`, 'bot', () => {
+
+              // BOTÓN DE DECISIÓN
+              const decisionBtn = document.createElement('button');
+              decisionBtn.className = 'chat-button-option';
+              decisionBtn.disabled = true;
+
+              const decisionIcon = document.createElement('i');
+              const decisionIcono = iconMap.hasOwnProperty(item.decision) ? iconMap[item.decision] : 'bi-chat-text';
+              decisionIcon.className = `bi ${decisionIcono}`;
+
+              decisionBtn.appendChild(decisionIcon);
+              decisionBtn.appendChild(document.createTextNode(` ${item.decision}`));
+
+              decisionBtn.style.backgroundColor = colorDecision;
+              decisionBtn.style.color = '#000';
+
+              addMessage(decisionBtn, 'user', () => {
+                addMessage(`Has seleccionado "${item.decision}". A continuación, te mostraré un video en Lengua de Señas Peruana donde se explica qué debes saber.`, 'bot', () => {
+
+                  const videoMsg = historial.find(m => m.contenido.startsWith("[VIDEO:"));
+                  if (videoMsg) {
+                    const clave = videoMsg.contenido.replace('[VIDEO:', '').replace(']', '').trim();
+                    const videoSrc = videoMap[clave];
+                    const video = document.createElement('video');
+                    video.src = videoSrc;
+                    video.controls = true;
+                    video.className = 'chat-video';
+
+                    addMessage(video, 'bot', () => {
+                      // Mostrar transcripción si existe y luego satisfacción
+                      if (transcripciones[item.decision]) {
+                        const transcripcionBox = document.createElement('div');
+                        transcripcionBox.className = 'transcripcion-box mt-2 p-3 rounded text-dark';
+                        transcripcionBox.innerHTML = `<strong>📝 Transcripción del video:</strong><br>${transcripciones[item.decision]}`;
+                        addMessage(transcripcionBox, 'bot', () => {
+                          mostrarSatisfaccionFinal(item, iconMap, decisionColorMap);
+                        });
+                      } else {
+                        mostrarSatisfaccionFinal(item, iconMap, decisionColorMap);
+                      }
+                    });
+                  }
+                });
+              });
+            });
+          });
+        });
+      });
+    }
+    function mostrarSatisfaccionFinal(item, iconMap, decisionColorMap) {
+      if (item.satisfaccion && item.satisfaccion.trim() !== "") {
+        const satisfaccionTexto = item.satisfaccion;
+
+        const satisfaccionBtn = document.createElement('button');
+        satisfaccionBtn.className = 'chat-button-option';
+        satisfaccionBtn.disabled = true;
+
+        const iconoSatisfaccion = iconMap.hasOwnProperty(satisfaccionTexto) ? iconMap[satisfaccionTexto] : 'bi-chat-text';
+        const satisfaccionIcon = document.createElement('i');
+        satisfaccionIcon.className = `bi ${iconoSatisfaccion}`;
+
+        satisfaccionBtn.appendChild(satisfaccionIcon);
+        satisfaccionBtn.appendChild(document.createTextNode(` ${satisfaccionTexto}`));
+
+        const colorVarSatisfaccion = decisionColorMap[item.satisfaccion] || '--button6';
+        satisfaccionBtn.style.backgroundColor = getComputedStyle(document.documentElement)
+          .getPropertyValue(colorVarSatisfaccion).trim();
+
+        satisfaccionBtn.style.color = '#000';
+
+        addMessage("¿Qué tan satisfecho estás con la ayuda mostrada?", 'bot', () => {
+          addMessage(satisfaccionBtn, 'user');
+          addMessage("Gracias por usar Telemedic. ¡Cuida tu salud! 💜", 'bot');
+        });
+      }
+    }
 
     function handleVideo(opcion) {
       lastUserAnswer = opcion;
@@ -276,22 +601,34 @@
       // Obtener el video correspondiente a la opción
       const videoSrc = videoMap[opcion] || 'https://www.w3schools.com/html/mov_bbb.mp4'; // Video por defecto si no se encuentra
 
+      // Mostrar mensaje de texto indicando que se va a mostrar el video
       addMessage(`Has seleccionado "${opcion}". A continuación, te mostraré un video en Lengua de Señas Peruana donde se explica qué debes saber.`, 'bot', () => {
+
+        // Crear el elemento de video
         const video = document.createElement('video');
         video.src = videoSrc;
         video.controls = true;
         video.style.width = '100%';
 
-        // Insertar el video como mensaje del bot (mantiene estilo)
-        addMessage(video, 'bot', () => {
-          // Luego del video, preguntar satisfacción
-          preguntarSatisfaccion(() => {
-            // Y luego mostrar botones finales
-            mostrarBotonesFinal();
+        // Mostrar texto representativo del video (para el historial)
+        addMessage(`🎥 Video explicativo: ${opcion}`, 'bot', () => {
+          addMessage(video, 'bot', () => {
+            // ✅ Mostrar transcripción si existe
+            if (transcripciones[opcion]) {
+              const transcripcionBox = document.createElement('div');
+              transcripcionBox.className = 'transcripcion-box mt-2 p-3 rounded text-dark';
+              transcripcionBox.innerHTML = `<strong>📝 Transcripción del video:</strong><br>${transcripciones[opcion]}`;
+              addMessage(transcripcionBox, 'bot');
+            }
+            // Luego del video, preguntar satisfacción
+            preguntarSatisfaccion(() => {
+              mostrarBotonesFinal();
+            });
           });
         });
       });
     }
+
     function showInputText(callback) {
       const container = document.createElement('div');
       const input = document.createElement('textarea');
@@ -353,13 +690,22 @@
       addMessage("¿Qué tan satisfecho estás con la ayuda mostrada?", 'bot', () => {
         showOptions(opciones, (respuestaSatisfaccion) => {
           guardarSatisfaccion(userName, respuestaSatisfaccion);
+          cargarHistorial();
           callbackFinal(); // Continuar con botones finales
         });
       });
     }
 
-
     function guardarRespuesta(nombre, opcion, decision) {
+      // Recolectar historial del chat actual
+      const mensajes = Array.from(document.querySelectorAll('.chat-message')).map(m => {
+        const esBot = m.classList.contains('bot');
+        return {
+          emisor: esBot ? 'bot' : 'user',
+          contenido: m.textContent.trim()
+        };
+      });
+
       fetch('/guardar_respuesta', {
         method: 'POST',
         headers: {
@@ -368,18 +714,22 @@
         body: JSON.stringify({
           nombre: nombre,
           opcion: opcion,
-          decision: decision
+          decision: decision,
+          historial: mensajes  // 👈 Enviamos el historial
         })
       })
         .then(response => {
           if (response.ok) {
             console.log("Respuesta guardada correctamente");
+            cargarHistorial();  // 👈 Actualiza el panel lateral
           } else {
             console.error("Error al guardar la respuesta");
           }
         })
         .catch(error => console.error("Error en fetch:", error));
     }
+
+
     function guardarSatisfaccion(nombre, satisfaccion) {
       fetch('/guardar_satisfaccion', {
         method: 'POST',
@@ -401,9 +751,72 @@
         .catch(error => console.error("Error en fetch de satisfacción:", error));
     }
 
+    function mostrarFAQ() {
+      const modalFondo = document.createElement('div');
+      modalFondo.className = 'modal-fondo';
+
+      const modalContenido = document.createElement('div');
+      modalContenido.className = 'modal-contenido';
+
+      const cerrarBtn = document.createElement('button');
+      cerrarBtn.innerHTML = '<i class="bi bi-x-lg"></i>';
+      cerrarBtn.className = 'btn btn-danger btn-sm float-end';
+      cerrarBtn.onclick = () => modalFondo.remove();
+
+      const titulo = document.createElement('h5');
+      titulo.textContent = 'Preguntas Frecuentes';
+      titulo.className = 'mb-3';
+
+      modalContenido.appendChild(cerrarBtn);
+      modalContenido.appendChild(titulo);
+
+      preguntasFrecuentes.forEach(p => {
+        const pregunta = document.createElement('p');
+        pregunta.className = 'fw-bold';
+        pregunta.textContent = '• ' + p.pregunta;
+
+        const respuesta = document.createElement('p');
+        respuesta.textContent = p.respuesta;
+
+        modalContenido.appendChild(pregunta);
+        modalContenido.appendChild(respuesta);
+      });
+
+      modalFondo.appendChild(modalContenido);
+      document.body.appendChild(modalFondo);
+    }
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const toggleBtn = document.getElementById("toggleSidebar");
+      const sidebar = document.getElementById("sidebar");
+
+      if (toggleBtn && sidebar) {
+        toggleBtn.addEventListener("click", function () {
+          sidebar.classList.toggle("collapsed");
+          const icon = toggleBtn.querySelector("i");
+
+          if (sidebar.classList.contains("collapsed")) {
+            icon.classList.remove("bi-chevron-left");
+            icon.classList.add("bi-chevron-right");
+            toggleBtn.setAttribute("title", "Mostrar historial");
+            toggleBtn.style.left = "0px";
+          } else {
+            icon.classList.remove("bi-chevron-right");
+            icon.classList.add("bi-chevron-left");
+            toggleBtn.setAttribute("title", "Ocultar historial");
+            toggleBtn.style.left = "270px";
+          }
+        });
+      }
+    });
+
+
+
 
     window.onload = () => {
       steps[currentStep]();
+      cargarHistorial(); // 👈 Carga el historial al iniciar
     };
   </script>
 

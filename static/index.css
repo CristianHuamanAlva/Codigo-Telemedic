@@ -195,3 +195,159 @@ body {
     font-size: 1rem;
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
+
+/* Mejora sidebar historial */
+.sidebar {
+    width: 270px;
+    min-height: 100vh;
+    border-right: 1px solid #ccc;
+
+    overflow-y: auto;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    z-index: 2;
+}
+
+.sidebar.collapsed {
+    margin-left: -270px;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#toggleSidebar {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+#historial-lista {
+    max-height: calc(100vh - 160px);
+    /* Ajusta si tu navbar es más o menos alta */
+    overflow-y: auto;
+    padding-right: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) transparent;
+}
+
+#historial-lista::-webkit-scrollbar {
+    width: 6px;
+}
+
+#historial-lista::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 6px;
+}
+
+
+
+#historial-lista button:hover {
+    background-color: var(--button1);
+    transform: translateX(2px);
+    color: #000;
+}
+
+/* Limita tamaño del chat como ChatGPT */
+.chat-container {
+    max-width: 800px;
+    height: calc(100vh - 150px);
+    /* adapta según navbar/footer */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background: white;
+    border-radius: var(--border-radius);
+    margin: 20px auto;
+}
+
+.chat-video {
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+}
+
+.chat-message.user button {
+    cursor: default;
+    opacity: 1;
+}
+.toggle-sidebar-button {
+  position: absolute;
+  top: 10px;
+  left: 270px;
+  z-index: 10;
+  border: none;
+  background: white;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  padding: 4px 8px;
+  transition: left 0.3s ease;
+  color: var(--text-color);
+}
+
+.sidebar.collapsed + .toggle-sidebar-button {
+  left: 0;
+}
+#chat {
+  overflow-y: auto;
+  max-height: 100%;
+  scroll-behavior: smooth;
+}
+.modal-fondo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(33, 37, 41, 0.6); /* Más suave y moderno */
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px); /* 🎉 desenfoque elegante */
+}
+
+.modal-contenido {
+  background: #fefefe;
+  padding: 30px 25px;
+  max-width: 500px;
+  width: 90%;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  font-family: 'Segoe UI', sans-serif;
+  color: #212529;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Si usas botones dentro del modal */
+.modal-contenido button {
+  background-color: #20c997;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.modal-contenido button:hover {
+  background-color: #17a589;
+}
+.transcripcion-box {
+  background-color: #fffbea;
+  border-left: 4px solid #f1c40f;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #333;
+}
